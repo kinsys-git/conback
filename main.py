@@ -2,6 +2,8 @@
 # This python file uses the following encoding: utf-8
 import home
 import arch
+import groups
+import services
 import os
 import shutil
 import pathlib
@@ -20,8 +22,6 @@ fileOut = cwd + "/Package/" + "/bootstrap.sh"
 ## Folder staging
 pathlib.Path(cwd + "/" + configStaging).mkdir(parents=True, exist_ok=True)
 
-
-
 if os.path.exists(fileOut):
     os.remove(fileOut)
 script = open(fileOut , "a")
@@ -39,7 +39,6 @@ for folders in home.homeDirFoldersExcluded:
     print(home.homeDir + folders)
 
 ## ARCH SPECIFIC
-## TODO config file - arch vs ubuntu
 ## TODO arch specific config file - aur vs non-aur options
 ## Package Install
 script.write("##### PACKAGES #####\n")
@@ -66,7 +65,7 @@ script.write("\n")
 ## SYSTEMD SPECIFIC
 ## Enable services
 script.write("##### SERVICES #####\n")
-for services in arch.enabledServices:
+for services in services.enabledServices:
     if services != "":
         script.write("sudo systemctl enable " + services)
 script.write("\n")
@@ -97,5 +96,22 @@ for items in home.configFiles:
     print("Copying " + home.configDir + items)
     shutil.copyfile(home.configDir + items , cwd + "/" + configStaging + "/" + items)
     script.write("cp $PWD/" + configStagingBash + "/" + items + " ~/.config/" + items + "\n")
+script.write("\n")
 
+## Add user to previous groups
+script.write("##### USER GROUPS #####\n")
+for items in groups.userGroups:
+    script.write("sudo usermod -a -G " + items + " $USER\n")
+script.write("\n")
+
+## Reboot option
+script.write("##### REBOOT QUESTION #####\n")
+script.write("echo 'Reboot now?(y/N)'\n")
+script.write("echo '  '\n")
+script.write("echo 'Enter: '\n")
+script.write("read choice\n")
+script.write("if [ $choice == Y -o $choice == y ]\n")
+script.write("    then\n")
+script.write("    systemctl reboot\n")
+script.write("fi\n")
 script.close()

@@ -1,17 +1,16 @@
 #!/usr/bin/python
 import subprocess
+import getpass
+import os
 
 allPackPath = "arch-allpackages"
 allAurPath = "arch-allaur"
-allEnabledServicesPath = "arch-enabledservices"
 allPackages = [""]
 allAur = [""]
 noAur = [""]
-enabledServices = [""]
 
 ## Run bash to export system information for processing
-archBash = subprocess.Popen(["bash", "arch-infoexport.sh"])
-archBash.wait()
+process = subprocess.run("pacman -Qqe > arch-allpackages && pacman -Qqm > arch-allaur", shell=True, check=True, text=True)
 
 ## Parse exported information
 with open(allPackPath) as fp:
@@ -32,16 +31,11 @@ with open(allAurPath) as fp:
        noAur.remove(line)
        cnt += 1
 
-with open(allEnabledServicesPath) as fp:
-   line = fp.readline()
-   cnt = 1
-   while line:
-       line = fp.readline()
-       enabledServices.append(line)
-       cnt += 1
-
-## Remove initialize variable
+## Remove initialize variables
 allPackages.remove("")
 allAur.remove("")
 noAur.remove("")
-enabledServices.remove("")
+
+## Cleanup
+os.remove(allPackPath)
+os.remove(allAurPath)

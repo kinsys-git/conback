@@ -9,9 +9,6 @@ import socket
 from os import path
 from fileoperations import FileOperations
 
-## TODO Config file - new user
-newUser = "annie"
-
 hostname = socket.gethostname()
 user = getpass.getuser()
 homeDir = "/home/" + user + "/"
