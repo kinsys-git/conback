@@ -38,4 +38,5 @@ class FileOperations:
             folderSize = sum(f.stat().st_size for f in folderPath.glob('**/*') if f.is_file() )
             if folderSize < 10000000:
                 output.append(folder)
+        output.remove('')
         return output

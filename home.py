@@ -7,6 +7,7 @@ import os.path
 import getpass
 import socket
 from os import path
+from pathlib import Path
 from fileoperations import FileOperations
 
 hostname = socket.gethostname()
@@ -22,10 +23,13 @@ homeDirFiles = FileOperations.searchHidden(homeDir , False)
 homeDirFoldersExcluded = FileOperations.searchHidden(homeDir , True)
 
 for folders in configFolders:
-    configFoldersExcluded.remove(folders)
+    if configFoldersExcluded.__contains__(folders):
+        configFoldersExcluded.remove(folders)
 for folders in homeDirFolders:
-    homeDirFoldersExcluded.remove(folders)
+    if configFoldersExcluded.__contains__(folders):
+        homeDirFoldersExcluded.remove(folders)
     if folders == ".cache":
         homeDirHiddenFolders.remove(folders)
         homeDirFoldersExcluded.append(folders)
+
 
