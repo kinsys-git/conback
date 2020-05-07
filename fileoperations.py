@@ -32,9 +32,10 @@ class FileOperations:
     ## Search the directory and remove large folders from the given variable
     @staticmethod
     def delistLargeFolders(baseDir , pathList):
+        output = [""]
         for folder in pathList:
             folderPath = Path(baseDir + folder)
             folderSize = sum(f.stat().st_size for f in folderPath.glob('**/*') if f.is_file() )
-            if folderSize > 10000000:
-                pathList.remove(folder)
-        return pathList
+            if folderSize < 10000000:
+                output.append(folder)
+        return output
