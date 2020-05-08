@@ -18,17 +18,26 @@ homeStagingBash = homeStaging.replace("Package/" , "")
 configStaging = homeStaging + "/.config"
 configStagingBash = configStaging.replace("Package/" , "")
 fileOut = cwd + "/Package/" + "/bootstrap.sh"
+fileOutPackages = cwd + "/Package/" + "/arch-packages"
+fileOutAUR = cwd + "/Package/" + "/arch-packages-aur"
 
 ## Folder staging
 pathlib.Path(cwd + "/" + configStaging).mkdir(parents=True, exist_ok=True)
 
 if os.path.exists(fileOut):
     os.remove(fileOut)
+if os.path.exists(fileOutPackages):
+    os.remove(fileOutPackages)
+if os.path.exists(fileOutAUR):
+    os.remove(fileOutAUR)
 script = open(fileOut , "a")
 script.write("#!/bin/bash\n")
 script.write("##THIS IS AN AUTOMATICALLY GENERATED SCRIPT AND WILL BE OVERWRITTEN\n")
 script.write("##PLEASE SEE https://github.com/soripants/conback FOR DETAILS\n")
 script.write("\n")
+
+scriptPackage = open(fileOutPackages , "a")
+scriptAUR = open(fileOutAUR , "a")
 
 ## Print exclusions
 print("----- CHANGE EXCLUSIONS IN conback.conf -----")
@@ -42,9 +51,11 @@ for folders in home.homeDirFoldersExcluded:
 ## TODO arch specific config file - aur vs non-aur options
 ## Package Install
 script.write("##### PACKAGES #####\n")
-script.write("sudo pacman -Syyu --noconfirm --needed ")
+script.write("sudo pacman -Syyu --noconfirm\n")
+script.write("sudo pacman -S --noconfirm --needed $(cat arch-packages)")
 for packages in arch.noAur:
-    script.write(packages.replace("\n" , "") + " ")
+    scriptPackage.write(packages)
+scriptPackage.close()
 script.write("\n")
 script.write("\n")
 script.write("##### AUR Packages #####\n")
@@ -55,9 +66,11 @@ script.write("cd yay\n")
 script.write("makepkg -si\n")
 script.write("cd ../..\n")
 script.write("rm -rf tmp\n")
-script.write("yay -S --noconfirm --needed ")
+script.write("yay -S --noconfirm --needed $(cat arch-packages-aur)")
 for packages in arch.allAur:
-    script.write(packages.replace("\n" , "") + " ")
+    if packages != "yay" or packages != "yay-git":
+        scriptAUR.write(packages)
+scriptAUR.close()
 script.write("\n")
 script.write("\n")
 
@@ -79,14 +92,14 @@ for items in home.homeDirFolders:
         print("Deleting " + cwd + "/" + homeStaging + "/" + items)
         shutil.rmtree(cwd + "/" + homeStaging + "/" + items)
     print("Copying " +  home.homeDir + items)
-    shutil.copytree(home.homeDir + items , cwd + "/" + homeStaging + "/" + items)
+    shutil.copytree(home.homeDir + items , cwd + "/" + homeStaging + "/" + items, symlinks=True, ignore=shutil.ignore_patterns("*.pipe"))
     script.write("cp -r $PWD/" + homeStagingBash + "/" + items + "/ ~/" + items + "/" + "\n")
 for items in home.configFolders:
     if os.path.exists(cwd + "/" + configStaging + "/" + items):
         print("Deleting" + cwd + "/" + configStaging + "/" + items)
         shutil.rmtree(cwd + "/" + configStaging + "/" + items)
     print("Copying " + home.configDir + items)
-    shutil.copytree(home.configDir + items , cwd + "/" + configStaging + "/" + items)
+    shutil.copytree(home.configDir + items , cwd + "/" + configStaging + "/" + items, symlinks=True, ignore=shutil.ignore_patterns("*.pipe"))
     script.write("cp -r $PWD/" + configStagingBash + "/" + items + "/ ~/.config/" + items + "/" + "\n")
 for items in home.homeDirFiles:
     print("Copying " + home.homeDir + items)

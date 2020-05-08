@@ -15,7 +15,7 @@ user = getpass.getuser()
 homeDir = "/home/" + user + "/"
 configDir = homeDir + ".config/"
 configFolders = FileOperations.delistLargeFolders(configDir , next(os.walk(configDir))[1])
-configFiles = next(os.walk(configDir))[2]
+configFiles = FileOperations.removeSymlinks(configDir , next(os.walk(configDir))[2])
 configFoldersExcluded = next(os.walk(configDir))[1]
 homeDirHiddenFolders = FileOperations.searchHidden(homeDir , True)
 homeDirFolders = FileOperations.delistLargeFolders(homeDir , homeDirHiddenFolders)
@@ -23,11 +23,9 @@ homeDirFiles = FileOperations.searchHidden(homeDir , False)
 homeDirFoldersExcluded = FileOperations.searchHidden(homeDir , True)
 
 for folders in configFolders:
-    if configFoldersExcluded.__contains__(folders):
-        configFoldersExcluded.remove(folders)
+    configFoldersExcluded.remove(folders)
 for folders in homeDirFolders:
-    if configFoldersExcluded.__contains__(folders):
-        homeDirFoldersExcluded.remove(folders)
+    homeDirFoldersExcluded.remove(folders)
     if folders == ".cache":
         homeDirHiddenFolders.remove(folders)
         homeDirFoldersExcluded.append(folders)

@@ -24,7 +24,7 @@ class FileOperations:
             return(foldersHidden)
         else:
             for item in files:
-                if item.startswith("."):
+                if item.startswith(".") and not os.path.islink(directory + item):
                     filesHidden.append(item)
             filesHidden.remove('')
             return filesHidden
@@ -35,8 +35,20 @@ class FileOperations:
         output = [""]
         for folder in pathList:
             folderPath = Path(baseDir + folder)
-            folderSize = sum(f.stat().st_size for f in folderPath.glob('**/*') if f.is_file() )
-            if folderSize < 10000000:
-                output.append(folder)
+            if not os.path.islink(folderPath):
+                folderSize = sum(f.stat().st_size for f in folderPath.glob('**/*') if f.is_file() )
+                if folderSize < 10000000:
+                    output.append(folder)
+        output.remove('')
+        return output
+
+    ## Check if file is symlink
+    @staticmethod
+    def removeSymlinks(baseDir , fileList):
+        output = [""]
+        for files in fileList:
+            filePath = Path(baseDir + files)
+            if not os.path.islink(filePath):
+                output.append(files)
         output.remove('')
         return output
